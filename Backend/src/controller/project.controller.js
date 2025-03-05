@@ -1,6 +1,6 @@
 const projectModel = require("../models/project.model");
-
-module.exports.CreateProjectController = async (req, res) => { 
+const AIservice = require("../services/AI.service")
+module.exports.CreateProjectController = async (req, res) => {
   try {
     const { name } = req.body;
 
@@ -9,9 +9,9 @@ module.exports.CreateProjectController = async (req, res) => {
     }
 
     const ifExists = await projectModel.findOne({ name });
-    
+
     if (ifExists) {
-        return res.status(400).json({ message: "Already project with Provided Name Exists" });
+      return res.status(400).json({ message: "Already project with Provided Name Exists" });
     }
     const newProject = await projectModel.create({ name });
 
@@ -38,3 +38,22 @@ module.exports.GetAllProjects = async (req, res) => {
     return res.status(500).json({ message: "Failed to fetch projects" });
   }
 };
+
+module.exports.getReviewOfCode = async (req, res) => {
+  try {
+    console.log(req.body)
+    const { code } = req.body
+    if(!code) return res.status(400).json({message:"Type SomeThing"})
+
+    const review = await AIservice.getReview(code)
+
+    if(!review) res.status(500).json({message : "Could Not Generate Response Try Again"})
+
+      return res.status(200).json({ review });
+
+
+  } catch (error) {
+    console.error("Error fetching projects:", error);
+    return res.status(500).json({ message: "Failed to fetch projects" });
+  }
+}

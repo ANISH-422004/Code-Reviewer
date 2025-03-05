@@ -40,7 +40,7 @@ const Home = () => {
       .get("http://localhost:3000/v1/api/projects/allprojects")
       .then((res) => setProjects(res.data.projects))
       .catch((e) => console.log(e));
-  }, []);
+  }, [modalOpen]);
 
   return (
     <main className="min-h-screen bg-gray-900 text-white p-4 md:p-6">

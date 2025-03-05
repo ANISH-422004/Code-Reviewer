@@ -2,11 +2,15 @@ import React, { useEffect, useState, useRef } from "react";
 import { IoIosSend } from "react-icons/io";
 import { useParams } from "react-router-dom";
 import { io } from "socket.io-client";
+import CodeBlock from "../../utils/codeArea/CodeBlock";
+import "prismjs";
+import "prismjs/themes/prism-tomorrow.css"; // Theme
+import "prismjs/components/prism-javascript"; // Language Support
 
 const Project = () => {
   const { id } = useParams();
   const [projectId] = useState(id);
-  const [code, setCode] = useState("// Start typing your code here...");
+  const [code, setCode] = useState("// Start typing your code here... \n let a  = 10  \n console.log(a)");
   const [messages, setMessages] = useState([]);
   const [currentMessage, setCurrentMessage] = useState("");
   const [socket, setSocket] = useState(null);
@@ -50,7 +54,10 @@ const Project = () => {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {messages.map((message, index) => (
-            <div key={index} className="bg-gray-700 p-2 rounded mb-2">
+            <div
+              key={index}
+              className="bg-gray-700 p-2 rounded mb-2 max-w-full break-words whitespace-pre-wrap min-h-[2rem] hover:text-xl transition-all duration-100 flex items-center"
+            >
               {message}
             </div>
           ))}
@@ -66,19 +73,20 @@ const Project = () => {
             placeholder="Type a message..."
             value={currentMessage}
             onChange={(e) => setCurrentMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                if (currentMessage !== "") {
+                  socket.emit("message", currentMessage);
+                  appendMessage(currentMessage);
+                  setCurrentMessage("");
+                }
+              }
+            }}
           />
           <button
             className="bg-blue-500 p-2 rounded"
             onClick={() => {
               if (currentMessage.trim() !== "" && socket) {
-                socket.emit("message", currentMessage);
-                appendMessage(currentMessage);
-                setCurrentMessage("");
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                console.log('enter')
                 socket.emit("message", currentMessage);
                 appendMessage(currentMessage);
                 setCurrentMessage("");
@@ -91,13 +99,7 @@ const Project = () => {
       </aside>
 
       {/* Code Area */}
-      <main className="col-span-6 bg-gray-700 p-4 rounded-lg flex flex-col items-center justify-center">
-        <textarea
-          className="w-full h-full p-2 bg-gray-900 bg-opacity-50 text-white rounded-lg outline-none border border-gray-600 shadow-lg"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-        />
-      </main>
+      <CodeBlock code={code} setCode={setCode} language="javascript" />
 
       {/* Code Review */}
       <aside className="col-span-3 bg-gray-800 p-4 rounded-lg flex flex-col justify-between">
